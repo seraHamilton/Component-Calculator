@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+    <style>
+        body {
+            background-color: #e3dae6;
+        }
+        h1 { 
+            text-align: center; 
+            font-weight: 800;
+        }
+        h6 {
+            font-size: 30px;
+        }
+        h7 {
+            font-size: 20px;
+        }
+        p { 
+            text-align: center; 
+            font-size: 30px;
+            font-weight: 300;
+        }
+        ol {
+            font-size: 20px;
+        }
+    </style>
+
+    <script type="text/javascript">
+        const colorband = ["Black", "Brown", "Red", "Orange", "Yellow", "Green", "Blue", "Violet", "Grey", "White"];
+
+        const allResistors = [10,11,12,13,15,16,18,20,22,24,27,30,
+            33,36,39,43,47,51,56,62,68,75,82,91,100,110,120,
+            130,150,160,180,200,220,240,270,300,330,360,390,
+            430,470,510,560,620,680,750,820,910];
+
+        function combinationSeries(sum) {
+            let arr = allResistors;
+            let ans = new Array();
+            let t = new Array();
+
+            let set = new Set([...arr]);
+            arr = [...set];
+            arr.sort();
+
+            findNumbers(ans, arr, sum, 0, t);
+
+            let finalVal = ans[0];
+
+            for (let i = 1; i < ans.length; ++i) {
+                if (ans[i].length < finalVal.length) {
+                    finalVal = ans[i];
+                }
+            }
+
+            return finalVal;
+        }
+
+        function combinationParallel(sum) {
+            let s = Math.round((1 / sum) * 10000) / 10000;
+            let arr = new Array();
+
+            for (let i = 0; i < allResistors.length; ++i) {
+                arr.push(Math.round((1 / allResistors[i]) * 10000) / 10000);
+            }
+
+            let ans = new Array();
+            let t = new Array();
+
+            let set = new Set([...arr]);
+            arr = [...set];
+            arr.sort();
+
+            findNumbers(ans, arr, s, 0, t);
+
+            let a = new Array();
+            let finalVal = ans[0];
+
+            for (let i = 1; i < ans.length; ++i) {
+                if (ans[i].length < finalVal.length) {
+                    finalVal = ans[i];
+                }
+            }
+
+            for (let i = 0; i < finalVal.length; ++i) {
+                if (Math.round(1 / finalVal[i]) >= 100) {
+                    if (Math.round(1 / finalVal[i]) % 10 >= 5) {
+                        a.push(Math.round(1 / finalVal[i]) + (10 - (Math.round(1 / finalVal[i]) % 10)));
+                    }
+                    else {
+                        a.push(Math.round(1 / finalVal[i]) - (Math.round(1 / finalVal[i]) % 10));
+                    }
+                }
+                else {
+                    a.push(Math.round(1 / finalVal[i]));
+                }
+            }
+
+            return a;
+        }
+
+        function findNumbers(ans, arr, sum, index, temp) {
+            if (sum == 0) {
+                ans.push([...temp]);
+                return;
+            }
+
+            for (let i = index; i < arr.length; ++i) {
+                if ((sum - arr[i]) >= 0) {
+                    temp.push(arr[i]);
+                    
+                    findNumbers(ans, arr, sum - arr[i], i, temp);
+
+                    temp.splice(temp.indexOf(arr[i]), 1);
+                }
+            }
+        }
+        
+        
+
+        //Matches up resistor found w/ its color code
+        function colorCode(r , c){
+            let res = r.toString();
+            while (res.length < 3){
+                res = "0" + res;
+            }
+            let colors = [];
+            colors.push(colorband[parseInt(res[0])]);
+            colors.push(colorband[parseInt(res[1])]);
+            colors.push(colorband[parseInt(res[2])]);
+            colors.push(c);
+            return colors;
+        }
+        
+        /**
+         * returns an int array created from user value input - Int Array
+         */
+        function createArray(valStr){
+            valStr = valStr.split(' ');
+            let valInt = [];
+            for (let i = 0; i < valStr.length; i++){
+                valInt.push(parseInt(valStr[i]));
+            }
+            return valInt;
+        }
+
+        /**
+         * returns total resistance from user inputed values - Double
+         */
+        function getTotalParallel(valueList) {
+            valueList = createArray(valueList);
+            let combinedRes = 0;
+            for (let i=0; i<valueList.length; i++) {
+                if (valueList[i] != 0){
+                    combinedRes += 1/valueList[i];
+                }
+            }
+            return 1/combinedRes;
+        }
+
+        /**
+         * returns total resistance from user inputed values - Double
+         */
+         function getTotalSeries(valueList) {
+            valueList = createArray(valueList);
+            let combinedRes = 0;
+            for (let i=0; i<valueList.length; i++) {
+                combinedRes += valueList[i];
+            }
+            return combinedRes;
+        }
+
+        /**
+         * finds remaining resistance needed by the user - Int Array
+         * returns array with the following:
+         * pos 0 holds exact value
+         * pos 1 holds smaller value close to exact
+         * pos 2 holds larger val close to exact
+         */
+        function calcResParallel(partial, total){ 
+
+            let remainR = 1/((1/total) - (1/partial));
+            let arr = [];
+            arr.push(remainR);
+
+            for (let i = 1; i<allResistors.length; i++){
+                if ((allResistors[i-1] - remainR <= 0) && (allResistors[i] - remainR >= 0)){
+                    arr.push(allResistors[i-1]);
+                    arr.push(allResistors[i]);
+                    break;
+                }
+            }
+
+            return arr;
+        }
+
+        /**
+         * finds remaining resistance needed by the user - Int Array
+         * returns array with the following:
+         * pos 0 holds exact value
+         * pos 1 holds smaller value close to exact
+         * pos 2 holds larger val close to exact
+         */
+        function calcResSeries(partial, total){ 
+
+            let remainR = total - partial;
+            let arr = [];
+            arr.push(remainR);
+
+            for (let i = 1; i<allResistors.length; i++){
+                if ((allResistors[i-1] - remainR <= 0) && (allResistors[i] - remainR >= 0)){
+                    arr.push(allResistors[i-1]);
+                    arr.push(allResistors[i]);
+                    break;
+                }
+            }
+
+            return arr;
+        }
+
+        function getPartSer(valueList, total){
+            return total - getTotalSeries(valueList);
+        }
+
+        function getPartPar(valueList, total){
+            return 1/((1/total) - (1/getTotalParallel(valueList)));
+        }
+
+         /**
+         * finds tolerance color value
+         */
+        function getTolColor(t){
+            if (t == 1){
+                return "Brown";
+            }
+            else if (t==2){
+                return "Red";
+            }
+            else if (t==0.5){
+                return "Green";
+            }
+            else if (t == 0.25){
+                return "Blue";
+            }
+            else if (t==0.1){
+                return "Violet";
+            }
+            else if (t==0.05){
+                return "Grey";
+            }
+            else if (t == 5){
+                return "Gold";
+            }
+            else {
+                return "Silver";
+            }
+        }
+
+        //Calls functions when button pressed to do calculations and then display
+        function displaySeriesCalculation() {
+            let valueList = document.getElementById('seriesValList').value;
+            let total = document.getElementById('totalSeries').value;
+            let tolerance = document.getElementById('tolerance').value;
+
+            let tolColor = getTolColor(tolerance);
+            let combo = combinationSeries(getPartSer(valueList, total));
+            let solution = calcResSeries(getTotalSeries(valueList), total);
+
+            let minColor = colorCode(solution[1], tolColor);
+            let maxColor = colorCode(solution[2], tolColor); 
+            document.getElementById("seriesExact").value = "Resistances: " + combo;
+            document.getElementById("seriesMin").value = "Smaller: " + solution[1];
+            document.getElementById("seriesMinColor").value = minColor;
+            document.getElementById("seriesMax").value = "Larger: " + solution[2];
+            document.getElementById("seriesMaxColor").value = maxColor;
+
+            //Display Series Rectangles
+            let c1 = document.getElementById("serCanvasMin");
+            let cx1 = c1.getContext("2d");
+            cx1.beginPath();
+            cx1.fillStyle = minColor[0];
+            cx1.fillRect(0, 0, 15, 20);
+            cx1.beginPath();
+            cx1.fillStyle = minColor[1];
+            cx1.fillRect(20, 0, 15, 20);
+            cx1.beginPath();
+            cx1.fillStyle = minColor[2];
+            cx1.fillRect(40, 0, 15, 20);
+            cx1.beginPath();
+            cx1.fillStyle = tolColor;
+            cx1.fillRect(60, 0, 15, 20);
+
+            let c2 = document.getElementById("serCanvasMax");
+            let c2x = c2.getContext("2d");
+            c2x.beginPath();
+            c2x.fillStyle = maxColor[0];
+            c2x.fillRect(0, 0, 15, 20);
+            c2x.beginPath();
+            c2x.fillStyle = maxColor[1];
+            c2x.fillRect(20, 0, 15, 20);
+            c2x.beginPath();
+            c2x.fillStyle = maxColor[2];
+            c2x.fillRect(40, 0, 15, 20);
+            c2x.beginPath();
+            c2x.fillStyle = tolColor;
+            c2x.fillRect(60, 0, 15, 20);
+
+            //Clears entries
+            document.getElementById('seriesValList').value = "";
+            document.getElementById('totalSeries').value = "";
+            document.getElementById('tolerance').value = "";
+        }
+
+        function displayParallelCalculation() {
+            let valueList = document.getElementById('parallelValList').value;
+            let total = document.getElementById('totalParallel').value;
+            let tolerance = document.getElementById('parTol').value;
+
+            let tolColor = getTolColor(tolerance);
+            let solution = calcResParallel(getTotalParallel(valueList), total);
+            let combo = combinationParallel(getPartPar(valueList, total));
+
+            let minColor = colorCode(solution[1], tolColor);
+            let maxColor = colorCode(solution[2], tolColor); 
+            document.getElementById("parallelExact").value = "Resistances: " + combo;
+            document.getElementById("parallelMin").value = "Smaller: " + solution[1];
+            document.getElementById("parallelMinColor").value = minColor;
+            document.getElementById("parallelMax").value = "Larger: " + solution[2];
+            document.getElementById("parallelMaxColor").value = maxColor;
+
+            //Display Parallel Rectangles
+            let c1 = document.getElementById("parCanvasMin");
+            let cx1 = c1.getContext("2d");
+            cx1.beginPath();
+            cx1.fillStyle = minColor[0];
+            cx1.fillRect(0, 0, 15, 20);
+            cx1.beginPath();
+            cx1.fillStyle = minColor[1];
+            cx1.fillRect(20, 0, 15, 20);
+            cx1.beginPath();
+            cx1.fillStyle = minColor[2];
+            cx1.fillRect(40, 0, 15, 20);
+            cx1.beginPath();
+            cx1.fillStyle = tolColor;
+            cx1.fillRect(60, 0, 15, 20);
+
+            let c2 = document.getElementById("parCanvasMax");
+            let c2x = c2.getContext("2d");
+            c2x.beginPath();
+            c2x.fillStyle = maxColor[0];
+            c2x.fillRect(0, 0, 15, 20);
+            c2x.beginPath();
+            c2x.fillStyle = maxColor[1];
+            c2x.fillRect(20, 0, 15, 20);
+            c2x.beginPath();
+            c2x.fillStyle = maxColor[2];
+            c2x.fillRect(40, 0, 15, 20);
+            c2x.beginPath();
+            c2x.fillStyle = tolColor;
+            c2x.fillRect(60, 0, 15, 20);
+            
+            //Clears entries
+            document.getElementById('parallelValList').value = "";
+            document.getElementById('totalParallel').value = "";
+            document.getElementById('parTol').value = "";
+        }
+    </script>
+
+    
+</head>
+<body>
+    <div class="container">
+        <p id = "display"></p>
+        <h1 style="font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif">🌶️Resistor Calculator🌶️</h1>
+        <h6> <strong>For all electronics lovers, hobby enthusiasts, even professionals: 
+            Our resistor calculator finds you the right resistors to achieve your resistance based on all resistor values in production!</strong> </h6>
+
+        <ol> <h6><strong>Simply input:</strong></h6>
+            <li>Known values</li>
+            <li>Total value</li>
+        </ol>
+    </div>
+
+
+    <div class="container">
+
+        <!-- Series --> 
+        <div class="section blue lighten-5" id="series"> 
+            <h1>Series</h1>
+            <div class = "row">
+                <div class = "input-field col s12">
+                    <p><strong>Total value must be greater than known values</strong></p>
+                        <form>
+                            <label for="valueList" style="color:black; font-size:3vw">Enter known values, separated by spaces:</label><br>
+                            <input type = "text" id="seriesValList" name="seriesValList"><br>
+                            <label for="total" style="color:black; font-size:3vw">Total Value Wanted:</label><br>
+                            <input type = "text" id="totalSeries" name="totalSeries"><br>
+                            <label for="tolerance" style="color:black; font-size:3vw">Tolerance (Enter as percent):</label><br>
+                            <input type = "text" id="tolerance" name="tolerance"><br>
+                            <a class="waves-effect waves-purple btn blue" onclick = "displaySeriesCalculation();"><i class="material-icons right">play_arrow</i>Calculate</a>
+                        </form>
+                </div>
+            </div>
+            <div class = "row">
+                <div class = "input-field col s6">
+                    <input class = "display-box" type = "text" id = "seriesExact" style="color:black" disabled>
+                </div>
+            </div> 
+
+            <div class = "row">
+                <div class = "input-field col s12">
+                    <p><strong>The following values are the nearest resistances if you want to use one resistor:</strong></p>
+                </div>
+            </div>
+            <div class = "row">
+                <div class = "input-field col s6">
+                    <br>
+                    <input class = "display-box" type = "text" id = "seriesMin" style="color:black" disabled>
+                </div>
+                <div class = "input-field col s6">
+                    <canvas id="serCanvasMin" width = "100" height = "20"></canvas>
+                    <input class = "display-box" type = "text" id = "seriesMinColor" style="color:black" disabled>
+                </div>
+            </div>
+            <div class = "row">
+                <div class = "input-field col s6">
+                    <br>
+                    <input class = "display-box" type = "text" id = "seriesMax" style="color:black" disabled>
+                </div>
+                <div class = "input-field col s6">
+                    <canvas id="serCanvasMax" width = "100" height = "20"></canvas>
+                    <input class = "display-box" type = "text" id = "seriesMaxColor" style="color:black" disabled>
+                </div>
+            </div>
+        </div>
+        <br>
+
+        <!-- Parallel -->
+        <div class="section blue lighten-5" id="parallel">
+            <h1>Parallel</h1>
+                <div class = "row"> 
+                    <div class = "input-field col s12">
+                        <form>
+                            <label for="valueList" style="color:black; font-size:3vw">Enter known values, separated by spaces:</label><br>
+                            <input type = "text" id="parallelValList" name="parallelValList"><br>
+                            <label for="total" style="color:black; font-size:3vw">Total Value Wanted:</label><br>
+                            <input type = "text" id="totalParallel" name="totalParallel"><br>
+                            <label for="parTol" style="color:black; font-size:3vw">Tolerance (Enter as percent):</label><br>
+                            <input type = "text" id="parTol" name="parTol"><br>
+                            <a class="waves-effect waves-purple btn blue" onclick = "displayParallelCalculation();"><i class="material-icons right">play_arrow</i>Calculate!</a>
+                        </form>
+                    </div>
+                </div>
+            <div class = "row">
+                <div class = "input-field col s6">
+                    <input class = "display-box" type = "text" id = "parallelExact" style="color:black" disabled>
+                </div>
+            </div>
+            <div class = "row">
+                <div class = "input-field col s12">
+                    <p><strong>The following values are the nearest resistances if you want to use one resistor:</strong></p>
+                </div>
+            </div>
+            <div class = "row">
+                <div class = "input-field col s6">
+                    <br>
+                    <input class = "display-box" type = "text" id = "parallelMin" style="color:black" disabled>
+                </div>
+                <div class = "input-field col s6">
+                    <canvas id="parCanvasMin" width = "100" height = "20"></canvas>
+                    <input class = "display-box" type = "text" id = "parallelMinColor" style="color:black" disabled>
+                </div>
+            </div>
+            <div class = "row">
+                <div class = "input-field col s6">
+                    <br>
+                    <input class = "display-box" type = "text" id = "parallelMax" style="color:black" disabled>
+                </div>
+                <div class = "input-field col s6">
+                    <canvas id="parCanvasMax" width = "100" height = "20"></canvas>
+                    <input class = "display-box" type = "text" id = "parallelMaxColor" style="color:black" disabled>
+                </div>
+            </div>
+        </div>
+        <br>
+        
+    </div>
+
+    <p><Strong>Made by: Sera Hamilton, Kaitlyn Chang, Amartya Kalra, Noah Paul</Strong></p>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script> M.AutoInit();</script>
+    
+</body>
+</html>
