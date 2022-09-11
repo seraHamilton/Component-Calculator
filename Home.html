@@ -1,3 +1,7 @@
+<!-- This project was created by Sera Hamilton, Kaitlyn Chang, Amartya Kalra, Noah Paul for the BCA 2021 Hackathon 
+Group members colloborated on one laptop to make this project in less than 2 days. Below, some of the functions 
+are labeled with a member's name to give credit on individual work. -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,6 +44,7 @@
             130,150,160,180,200,220,240,270,300,330,360,390,
             430,470,510,560,620,680,750,820,910];
 
+        //Amartya Kalra
         function combinationSeries(sum) {
             let arr = allResistors;
             let ans = new Array();
@@ -62,6 +67,7 @@
             return finalVal;
         }
 
+        //Amartya Kalra
         function combinationParallel(sum) {
             let s = Math.round((1 / sum) * 10000) / 10000;
             let arr = new Array();
@@ -88,6 +94,7 @@
                 }
             }
 
+            //Amartya Kalra
             for (let i = 0; i < finalVal.length; ++i) {
                 if (Math.round(1 / finalVal[i]) >= 100) {
                     if (Math.round(1 / finalVal[i]) % 10 >= 5) {
@@ -105,6 +112,7 @@
             return a;
         }
 
+        //Amartya Kalra
         function findNumbers(ans, arr, sum, index, temp) {
             if (sum == 0) {
                 ans.push([...temp]);
@@ -125,6 +133,7 @@
         
 
         //Matches up resistor found w/ its color code
+        //Sera Hamilton
         function colorCode(r , c){
             let res = r.toString();
             while (res.length < 3){
@@ -141,6 +150,7 @@
         /**
          * returns an int array created from user value input - Int Array
          */
+        //Sera Hamilton
         function createArray(valStr){
             valStr = valStr.split(' ');
             let valInt = [];
@@ -153,6 +163,7 @@
         /**
          * returns total resistance from user inputed values - Double
          */
+        //Sera Hamilton
         function getTotalParallel(valueList) {
             valueList = createArray(valueList);
             let combinedRes = 0;
@@ -167,6 +178,7 @@
         /**
          * returns total resistance from user inputed values - Double
          */
+        //Sera Hamilton
          function getTotalSeries(valueList) {
             valueList = createArray(valueList);
             let combinedRes = 0;
@@ -183,6 +195,7 @@
          * pos 1 holds smaller value close to exact
          * pos 2 holds larger val close to exact
          */
+        //Amartya Kalra
         function calcResParallel(partial, total){ 
 
             let remainR = 1/((1/total) - (1/partial));
@@ -207,6 +220,7 @@
          * pos 1 holds smaller value close to exact
          * pos 2 holds larger val close to exact
          */
+        //Amartya Kalra
         function calcResSeries(partial, total){ 
 
             let remainR = total - partial;
@@ -235,6 +249,7 @@
          /**
          * finds tolerance color value
          */
+        //Sera Hamilton
         function getTolColor(t){
             if (t == 1){
                 return "Brown";
@@ -263,6 +278,7 @@
         }
 
         //Calls functions when button pressed to do calculations and then display
+        //Sera Hamilton
         function displaySeriesCalculation() {
             let valueList = document.getElementById('seriesValList').value;
             let total = document.getElementById('totalSeries').value;
